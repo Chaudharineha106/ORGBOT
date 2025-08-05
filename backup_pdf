@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Chatbot</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* General Page Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #0d1117;
+            color: #ffffff;
+            text-align: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Header Section */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            background-color: #161b22;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .header img {
+            height: 50px;
+            margin-right: 15px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+            color: #ffffff;
+        }
+
+        /* Upload Section */
+        .upload-container {
+            max-width: 400px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #21262d;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            background-color: #2d333b;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button {
+            background-color: #58a6ff;
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #1f6feb;
+        }
+
+        /* Chat Container */
+        #chatContainer {
+            display: none;
+            width: 90%;
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #161b22;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .chat-box {
+            height: 300px;
+            overflow-y: auto;
+            background-color: #0d1117;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            text-align: left;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 8px;
+            max-width: 75%;
+        }
+
+        .user-message {
+            background-color: #58a6ff;
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .bot-message {
+            background-color: #2d333b;
+            text-align: left;
+        }
+
+        #userInput {
+            width: calc(100% - 90px);
+            padding: 10px;
+            border: 1px solid #30363d;
+            border-radius: 5px;
+            background-color: #0d1117;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <div class="header">
+        <img src="static/logo.png" alt="Logo">
+        <h1>Let's Talk with Your PDF</h1>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="upload-container">
+        <h2>Upload Your PDF</h2>
+        <input type="file" id="pdfFile" accept="application/pdf">
+        <button onclick="uploadPDF()">Upload</button>
+        <p id="status"></p>
+    </div>
+
+    <!-- Chat Section -->
+    <div id="chatContainer">
+        <h2>Chat with PDF</h2>
+        <div class="chat-box" id="chatBox"></div>
+        <input type="text" id="userInput" placeholder="Ask a question...">
+        <button onclick="askQuestion()">Ask</button>
+    </div>
+
+    <script>
+        function uploadPDF() {
+            let fileInput = document.getElementById('pdfFile');
+            let file = fileInput.files[0];
+            if (!file) {
+                alert('Please select a PDF file.');
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("file", file);
+
+            fetch('/upload_pdf', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById("status").innerText = "Upload successful!";
+                    document.getElementById("chatContainer").style.display = "block";
+                } else {
+                    document.getElementById("status").innerText = "Upload failed!";
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById("status").innerText = "Error uploading file.";
+            });
+        }
+
+        function askQuestion() {
+    let userInput = document.getElementById("userInput").value;
+    if (!userInput) {
+        alert('Please enter a question.');
+        return;
+    }
+
+    let chatBox = document.getElementById("chatBox");
+    let userMessage = `<div class='message user-message'>${userInput}</div>`;
+    chatBox.innerHTML += userMessage;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    fetch('/ask', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({question: userInput})
+    })
+    .then(response => response.json())
+    .then(data => {
+        let botMessage = `<div class='message bot-message'>${data.answer}</div>`;
+        chatBox.innerHTML += botMessage;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        let botMessage = `<div class='message bot-message'>Error retrieving response.</div>`;
+        chatBox.innerHTML += botMessage;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+}
+
+    </script>
+</body>
+</html>
