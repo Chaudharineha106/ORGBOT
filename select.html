@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome | OrgBot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body, html {
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+      overflow: hidden;
+    }
+
+    /* Background Slider */
+    .slider {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100vw;
+      z-index: -2;
+      display: flex;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .slide.active {
+      opacity: 1;
+    }
+
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: -1;
+    }
+
+    /* Main content */
+    .wrapper {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .content-box {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      padding: 50px;
+      border-radius: 20px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    .logo {
+      width: 100px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 32px;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+    }
+
+    button {
+      margin: 10px;
+      padding: 12px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #FFA500;
+      color: white;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #e69500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Images -->
+  <div class="slider">
+    <div class="slide active" style="background-image: url('static/images/img1.jpg');"></div>
+    <div class="slide" style="background-image: url('static/images/img2.jpg');"></div>
+    <div class="slide" style="background-image: url('static/images/img3.jpg');"></div>
+    <div class="slide" style="background-image: url('static/images/img4.jpg');"></div>
+    <div class="slide" style="background-image: url('static/images/img5.jpg');"></div>
+  </div>
+  
+
+  <!-- Foreground UI -->
+  <div class="wrapper">
+    <div class="content-box">
+      <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="Logo">
+      <h1>Welcome to OrgBot</h1>
+      <div class="selector-box">
+        <h2>Select User Type</h2>
+        <button onclick="selectType('user')">User</button>
+        <button onclick="selectType('employee')">Employee</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script>
+    function selectType(type) {
+      sessionStorage.setItem('selectedUserType', type);
+      window.location.href = "/login_page";
+    }
+
+    // Simple fade-only slider
+    const slides = document.querySelectorAll('.slide');
+    let current = 0;
+
+    setInterval(() => {
+      slides[current].classList.remove('active');
+      current = (current + 1) % slides.length;
+      slides[current].classList.add('active');
+    }, 4000);
+  </script>
+</body>
+</html>
